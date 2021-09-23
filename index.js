@@ -1,39 +1,40 @@
 const express = require('express')
 const app = express()
 const occupancy = require('./occupancy.json')
+const cors = require('cors')
 
 app.use(express.json())
 
-app.get('/occupancy', (req,res) => {
-	res.status(200).json(occupancy)
-})
 
-// app.get('/occupancy/:sensor', (req,res) => {
-// 	const sensor = req.params.id
-// 	const occupancy = occupancy.find(occupancy => occupancy.id === sensor)
-// 	res.status(200).json(occupancy)
-// })
+// ========================== CORS ========================== \\
 
-app.post('/occupancy', (req,res) => {
-	res.status(200).json(occupancy)
-})
+const corsOptions = {
+	origin: 'http://localhost:3000',
+	optionsSuccessStatus: 200
+}
 
-// ==========================FOR UNIT TEST========================== \\
+// ========================== REQUEST ========================== \\
 
-// const bodyParser = require("body-parser");
-// app.use(bodyParser.urlencoded());
-// app.use(bodyParser.json());
-const router = express.Router();
+app.get('/api/occupancy', cors(corsOptions), function(req, res) {
+	if (!occupancy)
+		res.status(400).json("invalid request message parameters or the data requested is not exist")
 
-router.get('/',function(req,res){
-	res.json({"error" : false, "message" : "Hello !"});
+	const param = req.query
+	const sensor = occupancy.filter(obj => {
+		return obj.sensor === param.sensor
+	})
+
+	if (!param.sensor && sensor.length < 1)
+		res.status(400).json("invalid request message parameters or the data requested is not exist")
+
+	if (param.sensor !== undefined && sensor.length > 0 && sensor[0].sensor === param.sensor)
+		res.status(200).json({ "inside": sensor[0].in + sensor[0].out })
+	else if (sensor[0].sensor !== param.sensor) res.status(400).json("invalid request message parameters or the data requested is not exist")
 });
 
-router.post('/add',function(req,res){
-	res.json({"error" : false, "message" : "success", "data" : req.body.num1 + req.body.num2});
-});
-
-app.use('/',router);
+app.post('/api/occupancy', cors(corsOptions), (req,res) => {
+	res.status(200).json(occupancy)
+})
 
 app.listen(8080, () => {
 	console.log("The server is running on")
