@@ -1,7 +1,11 @@
 # TechnicalTestSquareSense-BackEnd
 Backend of the Test task: meeting room occupancy web app
 
-To start use :
+To install, use :
+
+### `yarn install`
+
+To start, use :
 
 ### `node index.js`
 
